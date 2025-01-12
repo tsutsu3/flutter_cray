@@ -13,6 +13,7 @@ endif()
 
 # Set compile flags
 if (MSVC)
+    message(FATAL_ERROR "<!> Windows is not supported yet. Aborting build.")
     add_definitions(-DWINDOWS)
     add_definitions(/D_CRT_SECURE_NO_WARNINGS /D_CRT_NONSTDC_NO_DEPRECATE /D_SCL_SECURE_NO_WARNINGS)
 	# Avoid non-compliant standard library extensions
