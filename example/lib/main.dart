@@ -15,21 +15,16 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
-  late CrLogLevel level;
-  late CrLogLevel level2;
+  final cray = CRay.instance;
 
   @override
   void initState() {
     super.initState();
-    level = getCrLogLevel();
-    setCrLogLevel(CrLogLevel.info);
-    level2 = getCrLogLevel();
   }
 
   @override
   Widget build(BuildContext context) {
     const textStyle = TextStyle(fontSize: 25);
-    const spacerSmall = SizedBox(height: 10);
     return MaterialApp(
       home: Scaffold(
         appBar: AppBar(
@@ -41,15 +36,12 @@ class _MyAppState extends State<MyApp> {
             child: Column(
               children: [
                 Text(
-                  'before) log level: $level',
+                  'version: ${cray.getVersion()}',
                   style: textStyle,
-                  textAlign: TextAlign.center,
                 ),
-                spacerSmall,
                 Text(
-                  'after) log level: $level2',
+                  'git hash: ${cray.getGitHash()}',
                   style: textStyle,
-                  textAlign: TextAlign.center,
                 ),
               ],
             ),
