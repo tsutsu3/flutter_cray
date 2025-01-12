@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'dart:async';
 
-import 'package:flutter_cray/flutter_cray.dart' as flutter_cray;
+import 'package:flutter_cray/flutter_cray_bindings_generated.dart';
 
 void main() {
   runApp(const MyApp());
@@ -15,14 +15,15 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
-  late int sumResult;
-  late Future<int> sumAsyncResult;
+  late CrLogLevel level;
+  late CrLogLevel level2;
 
   @override
   void initState() {
     super.initState();
-    sumResult = flutter_cray.sum(1, 2);
-    sumAsyncResult = flutter_cray.sumAsync(3, 4);
+    level = getCrLogLevel();
+    setCrLogLevel(CrLogLevel.info);
+    level2 = getCrLogLevel();
   }
 
   @override
@@ -39,30 +40,16 @@ class _MyAppState extends State<MyApp> {
             padding: const EdgeInsets.all(10),
             child: Column(
               children: [
-                const Text(
-                  'This calls a native function through FFI that is shipped as source in the package. '
-                  'The native code is built as part of the Flutter Runner build.',
+                Text(
+                  'before) log level: $level',
                   style: textStyle,
                   textAlign: TextAlign.center,
                 ),
                 spacerSmall,
                 Text(
-                  'sum(1, 2) = $sumResult',
+                  'after) log level: $level2',
                   style: textStyle,
                   textAlign: TextAlign.center,
-                ),
-                spacerSmall,
-                FutureBuilder<int>(
-                  future: sumAsyncResult,
-                  builder: (BuildContext context, AsyncSnapshot<int> value) {
-                    final displayValue =
-                        (value.hasData) ? value.data : 'loading';
-                    return Text(
-                      'await sumAsync(3, 4) = $displayValue',
-                      style: textStyle,
-                      textAlign: TextAlign.center,
-                    );
-                  },
                 ),
               ],
             ),
