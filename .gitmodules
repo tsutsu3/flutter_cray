@@ -1,0 +1,3 @@
+[submodule "third_party/c-ray"]
+	path = third_party/c-ray
+	url = https://github.com/vkoskiv/c-ray.git
