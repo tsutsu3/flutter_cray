@@ -14,8 +14,7 @@ endif()
 # Set compile flags
 if (MSVC)
     add_definitions(-DWINDOWS)
-    # Silence "deprecation" warnings
-	add_definitions(/D_CRT_SECURE_NO_WARNINGS /D_CRT_NONSTDC_NO_DEPRECATE /D_SCL_SECURE_NO_WARNINGS)
+    add_definitions(/D_CRT_SECURE_NO_WARNINGS /D_CRT_NONSTDC_NO_DEPRECATE /D_SCL_SECURE_NO_WARNINGS)
 	# Avoid non-compliant standard library extensions
 	add_definitions(/D_CRT_DECLARE_NONSTDC_NAMES)
 	# Avoid windows.h junk
@@ -23,7 +22,7 @@ if (MSVC)
 	# Avoid windows.h from including some usually unused libs like winsocks.h, since this might cause some redefinition errors.
 	add_definitions(/DWIN32_LEAN_AND_MEAN)
 
-    set(CMAKE_C_FLAGS "/W3 /MP /Zi /Zo /permissive- /D_CRT_SECURE_NO_WARNINGS /D_CRT_NONSTDC_NO_DEPRECATE /D_SCL_SECURE_NO_WARNINGS /D_CRT_DECLARE_NONSTDC_NAMES")
+    set(CMAKE_C_FLAGS "/W3 /MP /Zi /Zo /permissive-")
     set(CMAKE_C_FLAGS_RELEASE "/O2 /GS- /MD")
     set(CMAKE_C_FLAGS_DEBUG "/Od /MDd /Zi")
 else()
@@ -31,7 +30,6 @@ else()
     set(CMAKE_C_FLAGS_RELEASE "-O2")
     set(CMAKE_C_FLAGS_DEBUG "-O0 -g")
 endif()
-
 
 # Include GetGitRevisionDescription for git hash
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/third_party/c-ray/cmake")
@@ -55,23 +53,9 @@ include_directories(third_party/c-ray/include)
 # Add generated gitsha1.c to sources
 list(APPEND CRAY_SOURCES_LIB ${CMAKE_BINARY_DIR}/generated/gitsha1.c)
 
-# Create Shared Library (libc-ray.so / libc-ray.dll)
-add_library(c-ray-shared SHARED ${CRAY_SOURCES_LIB})
-set_target_properties(c-ray-shared PROPERTIES OUTPUT_NAME "c-ray")
-
-# Set compiler options
-if (MSVC)
-    # set_target_properties(c-ray-shared PROPERTIES WINDOWS_EXPORT_ALL_SYMBOLS TRUE)
-    target_compile_options(c-ray-shared PRIVATE /W3)
-else()
-    target_compile_options(c-ray-shared PRIVATE -fPIC -fvisibility=hidden)
-endif()
-
-target_compile_definitions(c-ray-shared PRIVATE CR_BUILDING_LIB)
-
 # Create Static Library (libc-ray.a / libc-ray.lib)
 add_library(c-ray-static STATIC ${CRAY_SOURCES_LIB})
-set_target_properties(c-ray-static PROPERTIES OUTPUT_NAME "c-ray")
+set_target_properties(c-ray-static PROPERTIES OUTPUT_NAME "libc-ray")
 
 if (MSVC)
     target_compile_options(c-ray-static PRIVATE /W3)
@@ -79,19 +63,29 @@ else()
     target_compile_options(c-ray-static PRIVATE -fPIC -fvisibility=default)
 endif()
 
+# Windows の場合は `ws2_32` と `advapi32` をリンク
+if (MSVC)
+    target_link_libraries(c-ray-static PRIVATE ws2_32 advapi32)
+else()
+    target_link_libraries(c-ray-static PRIVATE -lpthread -lm -ldl)
+endif ()
+
+# Create Shared Library (libc-ray.so / libc-ray.dll)
+add_library(c-ray-shared SHARED ${CRAY_SOURCES_LIB})
+set_target_properties(c-ray-shared PROPERTIES OUTPUT_NAME "c-ray")
+
+if (MSVC)
+    target_compile_options(c-ray-shared PRIVATE /W3)
+else()
+    target_compile_options(c-ray-shared PRIVATE -fPIC -fvisibility=hidden)
+endif()
+
+target_compile_definitions(c-ray-shared PRIVATE CR_BUILDING_LIB)
+
 # Create Executable (bin/c-ray) linked statically with libc-ray.a
 add_executable(c-ray ${CRAY_SOURCES_DRIVER})
 set_target_properties(c-ray PROPERTIES OUTPUT_NAME "c-ray")
 target_link_libraries(c-ray PRIVATE c-ray-static)
-
-# Ensure math library (-lm) is linked correctly
-if (MSVC)
-    target_link_libraries(c-ray-static PRIVATE ws2_32)
-    target_link_libraries(c-ray PRIVATE ws2_32)
-else()
-    target_link_libraries(c-ray-static PRIVATE -lpthread -lm -ldl)
-    target_link_libraries(c-ray PRIVATE -lpthread -lm -ldl)
-endif ()
 
 # IPO (Interprocedural Optimization)
 include(CheckIPOSupported)
@@ -115,10 +109,10 @@ endif()
 
 if (NO_LOGO)
     message(STATUS "Disabling logo")
-	target_compile_definitions(c-ray PRIVATE -DNO_LOGO)
+    target_compile_definitions(c-ray PRIVATE -DNO_LOGO)
 endif()
 
 if (TESTING)
-	message(STATUS "Enabling test suite.")
-	target_compile_definitions(c-ray PRIVATE -DCRAY_TESTING)
+    message(STATUS "Enabling test suite.")
+    target_compile_definitions(c-ray PRIVATE -DCRAY_TESTING)
 endif()
