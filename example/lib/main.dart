@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'dart:async';
 
-import 'package:flutter_cray/flutter_cray_bindings_generated.dart';
+import 'package:flutter_cray/flutter_cray.dart';
 
 void main() {
   runApp(const MyApp());
@@ -15,16 +15,15 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
-  final cray = CRay.instance;
-
   @override
   void initState() {
     super.initState();
   }
 
+  final renderer = Renderer.create();
+
   @override
   Widget build(BuildContext context) {
-    const textStyle = TextStyle(fontSize: 25);
     return MaterialApp(
       home: Scaffold(
         appBar: AppBar(
@@ -36,13 +35,19 @@ class _MyAppState extends State<MyApp> {
             child: Column(
               children: [
                 Text(
-                  'version: ${cray.getVersion()}',
-                  style: textStyle,
+                  'version: ${getVersion()}',
                 ),
                 Text(
-                  'git hash: ${cray.getGitHash()}',
-                  style: textStyle,
+                  'git hash: ${getGitHash()}',
                 ),
+                Text(
+                  renderer
+                      .setStrPreference(
+                          RendererParam.cr_renderer_output_path, 'output/')
+                      .toString(),
+                ),
+                Text(renderer
+                    .getStrPreference(RendererParam.cr_renderer_output_path))
               ],
             ),
           ),

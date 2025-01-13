@@ -1,15 +1,15 @@
 # Run with `dart run ffigen --config ffigen.yaml`.
 name: FlutterCrayBindings
 description: |
-  Bindings for `src/flutter_cray.h`.
+  Bindings for `third_party/c-ray/include/c-ray.h`.
 
   Regenerate bindings with `dart run ffigen --config ffigen.yaml`.
 output: 'lib/flutter_cray_bindings_generated.dart'
 headers:
   entry-points:
-    - 'src/flutter_cray.h'
+    - 'third_party/c-ray/include/c-ray/c-ray.h'
   include-directives:
-    - 'src/flutter_cray.h'
+    - 'third_party/c-ray/include/c-ray/c-ray.h'
 preamble: |
   // ignore_for_file: always_specify_types
   // ignore_for_file: camel_case_types
@@ -17,3 +17,23 @@ preamble: |
 comments:
   style: any
   length: full
+enums:
+  as-int:
+    include:
+      - cr_log_level
+      - cr_bm_channel_precision
+      - cr_bm_colorspace
+      - cr_camera_param
+      - cr_color_mode
+      - cr_interpolation
+      - cr_light_path_info
+      - cr_math_op
+      - cr_object_type
+      - cr_renderer_callback
+      - cr_renderer_param
+      - cr_shader_node_type
+      - cr_tile_state
+      - cr_value_node_type
+      - cr_vec_op
+      - cr_vec_to_value_component
+      - cr_vector_node_type

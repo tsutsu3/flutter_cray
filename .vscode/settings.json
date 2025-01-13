@@ -1,0 +1,10 @@
+{
+  "[c]": {
+    "editor.formatOnSave": false,
+    "editor.formatOnType": false
+  },
+  "[h]": {
+    "editor.formatOnSave": false,
+    "editor.formatOnType": false
+  }
+}
