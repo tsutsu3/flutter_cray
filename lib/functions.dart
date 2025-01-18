@@ -1,0 +1,46 @@
+import 'dart:ffi';
+import 'package:ffi/ffi.dart';
+import 'package:flutter_cray/loader.dart';
+
+// ============================================================================
+// Library Info
+// ============================================================================
+
+/// Returns the version of the native c-ray library.
+String getVersion() {
+  return bindings.cr_get_version().cast<Utf8>().toDartString();
+}
+
+/// Returns the git hash of the native c-ray library.
+String getGitHash() {
+  return bindings.cr_get_git_hash().cast<Utf8>().toDartString();
+}
+
+// ============================================================================
+// Logging
+// ============================================================================
+
+/// Set the log level of the native c-ray library.
+void setLogLevel(int level) {
+  bindings.cr_log_level_set(level);
+}
+
+/// Get the log level of the native c-ray library.
+int getLogLevel() {
+  return bindings.cr_log_level_get();
+}
+
+// ============================================================================
+// Misc
+// ============================================================================
+
+/// Send a shutdown signal to the workers.
+void sendShutdownToWorkers(String nodeList) {
+  final nodeListPtr = nodeList.toNativeUtf8();
+
+  try {
+    bindings.cr_send_shutdown_to_workers(nodeListPtr.cast<Char>());
+  } finally {
+    malloc.free(nodeListPtr);
+  }
+}
