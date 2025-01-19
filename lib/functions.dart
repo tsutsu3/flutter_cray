@@ -1,6 +1,7 @@
 import 'dart:ffi';
 import 'package:ffi/ffi.dart';
 import 'package:flutter_cray/loader.dart';
+import 'package:flutter_cray/renderer.dart';
 
 // ============================================================================
 // Library Info
@@ -42,5 +43,16 @@ void sendShutdownToWorkers(String nodeList) {
     bindings.cr_send_shutdown_to_workers(nodeListPtr.cast<Char>());
   } finally {
     malloc.free(nodeListPtr);
+  }
+}
+
+/// Load json scene from file.
+bool loadJson(Renderer renderer, String filename) {
+  final filenamePtr = filename.toNativeUtf8();
+
+  try {
+    return bindings.cr_load_json(renderer.pointer, filenamePtr.cast<Char>());
+  } finally {
+    malloc.free(filenamePtr);
   }
 }

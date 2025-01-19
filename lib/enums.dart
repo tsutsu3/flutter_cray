@@ -413,3 +413,65 @@ enum CrLogLevel {
     }
   }
 }
+
+/// Enum for the bitmap colorspace.
+enum CrBitmapColorspace {
+  /// Linear colorspace.
+  linear,
+
+  /// sRGB colorspace.
+  sRGB;
+
+  /// Converts enum to integer value
+  int toInt() {
+    switch (this) {
+      case CrBitmapColorspace.linear:
+        return cr_bm_colorspace.cr_bm_linear;
+      case CrBitmapColorspace.sRGB:
+        return cr_bm_colorspace.cr_bm_sRGB;
+    }
+  }
+
+  /// Converts integer value back to enum
+  static CrBitmapColorspace fromInt(int value) {
+    switch (value) {
+      case cr_bm_colorspace.cr_bm_linear:
+        return CrBitmapColorspace.linear;
+      case cr_bm_colorspace.cr_bm_sRGB:
+        return CrBitmapColorspace.sRGB;
+      default:
+        throw ArgumentError('Invalid CrBitmapColorspace value: $value');
+    }
+  }
+}
+
+/// Enum for the bitmap channel precision.
+enum CrBitmapPrecision {
+  /// 8-bit channel precision.
+  char,
+
+  /// 32-bit floating point channel precision.
+  float;
+
+  /// Converts enum to integer value
+  int toInt() {
+    switch (this) {
+      case CrBitmapPrecision.char:
+        return cr_bm_channel_precision.cr_bm_char;
+      case CrBitmapPrecision.float:
+        return cr_bm_channel_precision.cr_bm_float;
+    }
+  }
+
+  /// Converts integer value back to enum
+  static CrBitmapPrecision fromInt(int value) {
+    switch (value) {
+      case cr_bm_channel_precision.cr_bm_char:
+        return CrBitmapPrecision.char;
+      case cr_bm_channel_precision.cr_bm_float:
+        return CrBitmapPrecision.float;
+      default:
+        throw ArgumentError('Invalid CrBitmapPrecision value: $value');
+    }
+  }
+}

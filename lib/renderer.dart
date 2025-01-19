@@ -3,6 +3,7 @@ import 'package:ffi/ffi.dart';
 import 'package:flutter_cray/enums.dart';
 import 'package:flutter_cray/flutter_cray_bindings_generated.dart';
 import 'package:flutter_cray/loader.dart';
+import 'package:flutter_cray/structs.dart';
 
 /// A Dart wrapper for the native C-ray renderer.
 ///
@@ -12,30 +13,29 @@ class Renderer {
   /// Private constructor to prevent direct instantiation.
   Renderer._(this._ptr);
 
+  /// Creates a new instance of the C-ray renderer.
+  factory Renderer.create() {
+    return Renderer._(bindings.cr_new_renderer());
+  }
+
   /// The native pointer to the C-ray renderer.
   final Pointer<cr_renderer> _ptr;
 
   /// Returns the native pointer (for advanced use cases).
   Pointer<cr_renderer> get pointer => _ptr;
 
-  /// Creates a new instance of the C-ray renderer.
-  factory Renderer.create() {
-    return Renderer._(bindings.cr_new_renderer());
-  }
-
   /// Releases the allocated memory for this renderer.
   void dispose() {
     bindings.cr_destroy_renderer(_ptr);
   }
 
-  // TODO
-  /// Set a callback for the renderer
+  // Set a callback for the renderer
   // bool setCallback(
-  //     int rendererCallback,
+  //     CrRendererCallbackEnum rendererCallback,
   //     Pointer<NativeFunction<RendererCallback>> callback,
   //     Pointer<Void> userData) {
   //   return bindings.cr_renderer_set_callback(
-  //       _ptr, rendererCallback, callback, userData);
+  //       _ptr, rendererCallback.toInt(), callback, userData);
   // }
 
   /// Set a numeric preference for the renderer
@@ -83,7 +83,7 @@ class Renderer {
       return ''; // Handle null pointer case gracefully
     }
 
-    final String result = resultPtr.cast<Utf8>().toDartString();
+    final result = resultPtr.cast<Utf8>().toDartString();
 
     // Assuming the native function allocates memory, free it after conversion
     malloc.free(resultPtr);
@@ -94,5 +94,20 @@ class Renderer {
   /// Get a numeric preference for the renderer
   int getNumPreference(CrRendererParamEnum rendererParam) {
     return bindings.cr_renderer_get_num_pref(_ptr, rendererParam.toInt());
+  }
+
+  /// Render the scene using the current renderer settings.
+  void render() {
+    bindings.cr_renderer_render(_ptr);
+  }
+
+  /// Start the renderer in interactive mode.
+  void startInteractive() {
+    bindings.cr_renderer_start_interactive(_ptr);
+  }
+
+  /// Get render result image
+  CrBitmap getResult() {
+    return CrBitmap.fromPointer(bindings.cr_renderer_get_result(_ptr));
   }
 }
