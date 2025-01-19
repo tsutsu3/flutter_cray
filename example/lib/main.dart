@@ -1,89 +1,35 @@
 import 'package:flutter/material.dart';
 import 'dart:async';
-
-import 'package:flutter_cray/flutter_cray.dart';
 import 'dart:io';
+import 'package:flutter/services.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:flutter_cray/flutter_cray.dart';
 
-/// JSON文字列をファイルに保存
-Future<String> saveJsonToFile(String jsonString, String fileName) async {
-  // 保存先ディレクトリを取得
+Future<void> setupDefaultFiles() async {
   final directory = await getApplicationDocumentsDirectory();
 
-  // 保存先ファイルのパスを作成
-  final filePath = '${directory.path}/$fileName';
+  final sampleFilePath = '${directory.path}/sample.json';
 
-  // ファイルを作成してJSON文字列を書き込む
-  final file = File(filePath);
-  await file.writeAsString(jsonString);
-
-  // ファイルパスを返す
-  return filePath;
-}
-
-Future<String> getFilePath(String fileName) async {
-  final directory = await getApplicationDocumentsDirectory();
-  return '${directory.path}/$fileName';
-}
-
-final scene = '''{
-  "version": 1.0,
-  "renderer": {
-    "threads": 0,
-    "samples": 250,
-    "bounces": 30,
-    "tileWidth": 64,
-    "tileHeight": 64,
-    "tileOrder": "fromMiddle",
-    "outputFilePath": "output/",
-    "outputFileName": "rendered",
-    "fileType": "png",
-    "count": 0,
-    "width": 800,
-    "height": 800
-  },
-  "display": {"isFullscreen": false, "isBorderless": false, "windowScale": 1.0},
-  "camera": {
-    "FOV": 10.0,
-    "focalDistance": 0.7,
-    "fstops": 0,
-    "transforms": [
-      {"type": "translate", "x": 0, "y": 0.1, "z": -0.7},
-      {"type": "rotateX", "degrees": 5},
-      {"type": "rotateZ", "degrees": 0}
-    ]
-  },
-  "scene": {
-    "ambientColor": {
-      "type": "background",
-      "offset": 0,
-      "down": {"r": 1.0, "g": 1.0, "b": 1.0},
-      "up": {"r": 0.5, "g": 0.7, "b": 1.0}
-    },
-    "primitives": [
-      {
-        "type": "sphere",
-        "instances": [
-          {
-            "transforms": [
-              {"type": "rotateY", "degrees": 110},
-              {"type": "translate", "x": 0, "y": 0.05, "z": 0}
-            ]
-          }
-        ],
-        "material": {
-          "type": "plastic",
-          "color": {"r": 1.0, "g": 0.87, "b": 0.0},
-          "roughness": 0
-        },
-        "radius": 0.05
-      }
-    ],
-    "meshes": []
+  if (!File(sampleFilePath).existsSync()) {
+    await copyAssetToFile('assets/sample.json', sampleFilePath);
   }
-}''';
+}
 
-void main() {
+Future<void> copyAssetToFile(String assetPath, String destinationPath) async {
+  // アセットを読み込む
+  final byteData = await rootBundle.load(assetPath);
+
+  // ファイルに書き込む
+  final file = File(destinationPath);
+  await file.writeAsBytes(byteData.buffer.asUint8List());
+}
+
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+
+  // アプリ起動時にファイルをセットアップ
+  await setupDefaultFiles();
+
   runApp(const MyApp());
 }
 
@@ -95,22 +41,21 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
-  String? filePath; // ファイルパスを保持
+  String? filePath; // ファイルパスを格納する変数
+  final renderer = Renderer.create();
+
   @override
   void initState() {
     super.initState();
-
-    saveJsonToFile(scene, 'scene.json').then((path) {
-      setState(() {
-        filePath = path; // ファイルパスを保存
-      });
-      print('File saved at: $path');
-    }).catchError((e) {
-      print('Error saving JSON: $e');
-    });
+    _initFilePath(); // 非同期でファイルパスを取得
   }
 
-  final renderer = Renderer.create();
+  Future<void> _initFilePath() async {
+    final directory = await getApplicationDocumentsDirectory();
+    setState(() {
+      filePath = '${directory.path}/sample.json';
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -131,17 +76,16 @@ class _MyAppState extends State<MyApp> {
                   'git hash: ${getGitHash()}',
                 ),
                 Text(
-                  filePath != null
-                      ? 'loadJson: ${loadJson(renderer, filePath!)}'
-                      : 'Loading file...',
+                  'File Path: ${filePath ?? "Loading..."}', // ファイルパスを表示
                 ),
+                Text('loadJson: ${loadJson(renderer, filePath!)}'),
                 Text(
                   renderer
                       .setStrPreference(
                           CrRendererParamEnum.outputPath, 'output/')
                       .toString(),
                 ),
-                Text(renderer.getStrPreference(CrRendererParamEnum.outputPath))
+                Text(renderer.getStrPreference(CrRendererParamEnum.outputPath)),
               ],
             ),
           ),
