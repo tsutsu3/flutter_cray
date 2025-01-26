@@ -1,5 +1,6 @@
 import 'dart:ffi';
 import 'package:ffi/ffi.dart';
+import 'package:flutter_cray/enums.dart';
 import 'package:flutter_cray/loader.dart';
 import 'package:flutter_cray/renderer.dart';
 
@@ -22,13 +23,13 @@ String getGitHash() {
 // ============================================================================
 
 /// Set the log level of the native c-ray library.
-void setLogLevel(int level) {
-  bindings.cr_log_level_set(level);
+void logLevelSet(CrLogLevel level) {
+  bindings.cr_log_level_set(level.toInt());
 }
 
 /// Get the log level of the native c-ray library.
-int getLogLevel() {
-  return bindings.cr_log_level_get();
+CrLogLevel logLevelGet() {
+  return CrLogLevel.fromInt(bindings.cr_log_level_get());
 }
 
 // ============================================================================

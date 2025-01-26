@@ -6,5 +6,9 @@
   "[h]": {
     "editor.formatOnSave": false,
     "editor.formatOnType": false
+  },
+  "files.associations": {
+    "*.yaml": "yaml",
+    "cjson.h": "c"
   }
 }
